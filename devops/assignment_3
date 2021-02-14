@@ -1,0 +1,47 @@
+pipeline {
+    agent any 
+    parameters{
+gitParameter(branch: '', branchFilter: '.*', defaultValue: 'master', description: 'Enter the required branch', name: 'Branch', quickFilterEnabled: false, selectedValue: 'NONE', sortMode: 'NONE', tagFilter: '*', type: 'PT_BRANCH')
+string(defaultValue: '', description: 'Accept the string', name: 'git_url', trim: false)
+}
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checkout the code from GIT'
+				checkout([$class: 'GitSCM', 
+                          branches: [[name: "${params.Branch}"]], 
+                          doGenerateSubmoduleConfigurations: false, 
+                          extensions: [], 
+                          gitTool: 'Default', 
+                          submoduleCfg: [], 
+                          userRemoteConfigs: [[url: "${params.git_url}"]]
+                        ])
+            }
+        }
+        stage('Test') {
+            steps {
+                echo 'Testing' 
+            }
+        }
+        stage('QA') {
+            steps {
+                echo 'Code Quality' 
+            }
+        }
+        stage('Bulid') {
+            steps {
+                echo 'Bulid the code' 
+                tool name: 'java_home', type: 'jdk'
+                tool name: 'maven_home', type: 'maven'
+                sh 'mvn clean install'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Deploy the code' 
+                sh 'cp /var/lib/jenkins/workspace/practice/demo_project/target/java-tomcat-maven-example.war /var/lib/tomcat/webapps'
+            }
+        }
+    }
+}
