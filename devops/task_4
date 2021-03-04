@@ -1,0 +1,42 @@
+pipeline {
+    agent any
+    parameters{
+gitParameter(branch: '', branchFilter: '.*', defaultValue: 'master', description: 'enter the branch name', name: 'branch', quickFilterEnabled: false, selectedValue: 'NONE', sortMode: 'NONE', tagFilter: '*', type: 'PT_BRANCH')
+}
+    stages {
+        stage(checkout) {
+            steps {
+                echo 'checking out the code from GIT'
+                checkout([$class: 'GitSCM', 
+                          branches: [[name: "${params.branch}"]], 
+                          doGenerateSubmoduleConfigurations: false, 
+                          extensions: [], 
+                          gitTool: 'Default', 
+                          submoduleCfg: [], 
+                          userRemoteConfigs: [[url: "https://github.com/divyarinku/new_project.git"]]
+            ])
+                
+            }
+        }
+        stage(test){
+            steps{
+                echo 'test the war file'
+                tool name: 'java_home', type: 'jdk'
+                tool name: 'maven_home', type: 'maven'
+            }
+        }
+        stage(qa){
+            steps{
+                echo 'checking the code quality'
+            }
+        }
+        stage(build){
+            steps{
+             echo "Building"   
+			 //sh("git tag ${BUILD_NUMBER}")
+			 sh 'git tag -a ${BUILD_NUMBER}'
+			 sh 'git push origin tag ${BUILD_NUMBER}'
+            }
+        }
+    }
+}
