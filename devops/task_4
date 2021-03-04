@@ -34,7 +34,7 @@ gitParameter(branch: '', branchFilter: '.*', defaultValue: 'master', description
             steps{
              echo "Building"   
 			 //sh("git tag ${BUILD_NUMBER}")
-			 sh 'git tag -a ${BUILD_NUMBER}'
+			 sh 'git tag -a ${BUILD_NUMBER} -m "Creating new tag"'
 			 sh 'git push origin tag ${BUILD_NUMBER}'
             }
         }
